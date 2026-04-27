@@ -56,6 +56,13 @@
   --col-left: 1.5rem;
   --dot-size: 11px;
   --indent: calc(var(--col-left) + var(--dot-size) + 1rem);
+
+  /* layout duas colunas (desktop) */
+  --tl-max:    980px;
+  --tl-center: 50%;          /* posição horizontal da linha */
+  --col-ev:    44%;           /* largura da coluna de eventos (esquerda) */
+  --col-nt:    38%;           /* largura da coluna de notas  (direita)  */
+  --gap-line:  1.5rem;        /* espaço entre conteúdo e linha */
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -208,10 +215,12 @@ header h1 em { font-style: italic; color: var(--sepia); }
 /* ── TIMELINE ── */
 .timeline {
   position: relative;
-  max-width: 680px;
+  max-width: var(--tl-max);
   margin: 0 auto;
-  padding: 0 var(--col-left) 8rem;
+  padding: 0 2rem 8rem;
 }
+
+/* linha vertical — mobile: esquerda / desktop: centro */
 .timeline::before {
   content: '';
   position: absolute;
@@ -224,7 +233,7 @@ header h1 em { font-style: italic; color: var(--sepia); }
 /* ── ERA SEPARATOR ── */
 .era-sep {
   position: relative;
-  padding: 2.5rem 0 .25rem var(--indent);
+  padding: 2.8rem 0 .3rem var(--indent);
   display: flex; align-items: center; gap: .65rem;
   transition: opacity .3s;
 }
@@ -233,7 +242,7 @@ header h1 em { font-style: italic; color: var(--sepia); }
   content: '';
   position: absolute;
   left: calc(var(--dot-size) / 2 - .5px);
-  top: calc(2.5rem + .3em);
+  top: calc(2.8rem + .3em);
   width: 13px; height: 13px; border-radius: 50%;
   background: var(--ec, var(--sepia));
   border: 2px solid var(--bg);
@@ -261,6 +270,7 @@ header h1 em { font-style: italic; color: var(--sepia); }
 .tl-ev.vis { opacity: 1; transform: translateX(0); }
 .tl-ev.dimmed { opacity: .1 !important; transform: none !important; pointer-events: none; }
 
+/* dot evento — mobile: na linha esquerda */
 .tl-ev::before {
   content: '';
   position: absolute;
@@ -376,6 +386,7 @@ details[open].mais summary::before { transform: rotate(90deg); }
 .tl-nt.vis { opacity: 1; transform: translateX(0); }
 .tl-nt.dimmed { opacity: .1 !important; transform: none !important; pointer-events: none; }
 
+/* dot nota — mobile: na linha esquerda */
 .tl-nt::before {
   content: '';
   position: absolute;
@@ -383,7 +394,7 @@ details[open].mais summary::before { transform: rotate(90deg); }
   top: calc(.8rem + .5em);
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--accent-b); border: 1.5px solid var(--bg);
-  opacity: .5;
+  opacity: .45;
   z-index: 2; transform: translateX(-50%);
 }
 .nota-in {
@@ -656,10 +667,115 @@ footer a:hover { text-decoration: underline; }
 }
 .no-results.visible { display: block; }
 
-@media (max-width: 430px) {
+/* ── MOBILE: layout original, uma coluna à esquerda ── */
+@media (max-width: 700px) {
   :root { --col-left: 1.1rem; --dot-size: 10px; }
   header h1 { font-size: 2rem; }
-  .timeline { padding-bottom: 5rem; }
+  .timeline { padding: 0 1rem 5rem; }
+}
+
+/* ── DESKTOP: duas colunas, linha ao centro ── */
+@media (min-width: 700px) {
+
+  /* timeline: largura máxima, posição relativa para os filhos absolutos */
+  .timeline {
+    padding: 0 3rem 8rem;
+    /* linha central explícita via ::before */
+  }
+
+  /* linha ao centro exato */
+  .timeline::before {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* ─── ERA SEPARATOR ─── */
+  /* usa grid: [col-esq | centro | col-dir] */
+  .era-sep {
+    display: grid;
+    grid-template-columns: calc(50% - 1px) 2px 1fr;
+    align-items: center;
+    gap: 0;
+    padding: 3.2rem 0 .4rem 0;
+    position: relative;
+  }
+  /* dot de era: sentado exatamente na coluna central (2px) */
+  .era-sep::before {
+    position: absolute;
+    left: 50%;
+    top: calc(3.2rem + .38em);
+    transform: translateX(-50%);
+  }
+  /* texto à direita da coluna esquerda */
+  .era-sep span {
+    grid-column: 1;
+    text-align: right;
+    padding-right: 1.6rem;
+    white-space: nowrap;
+  }
+  /* linha decorativa à direita */
+  .era-sep::after {
+    grid-column: 3;
+    margin-left: 1.6rem;
+  }
+
+  /* ─── EVENTO: coluna esquerda ─── */
+  .tl-ev {
+    width: calc(50% - 1.6rem);   /* até 1.6rem antes da linha */
+    padding: 2rem 0 .6rem 0;
+    margin-left: 0;
+    transform: translateX(-10px);
+    /* text-align right para que o card encoste na linha */
+    /* (não usamos text-align pois o card é bloco) */
+  }
+  .tl-ev.vis { transform: translateX(0); }
+
+  /* dot evento: na borda direita do card, encostado na linha */
+  /* O card vai até calc(50% - 1.6rem) do .timeline.
+     A linha fica em 50% do .timeline.
+     Gap entre card e linha = 1.6rem.
+     O dot (12px) fica centralizado nesse gap: right = -(1.6rem + 6px) */
+  .tl-ev::before {
+    position: absolute;
+    left: auto;
+    right: calc(-1.6rem - 6px);
+    top: calc(2rem + .52em);
+    transform: none;
+    width: 12px; height: 12px;
+  }
+
+  /* ─── NOTA: coluna direita ─── */
+  .tl-nt {
+    width: calc(40% - 1rem);
+    margin-left: calc(50% + 1.6rem);
+    padding: 1rem 0 .4rem 0;
+    transform: translateX(10px);
+  }
+  .tl-nt.vis { transform: translateX(0); }
+
+  /* dot nota: na borda esquerda da nota, encostado na linha */
+  /* O .tl-nt começa em 50% + 1.6rem do .timeline.
+     A linha fica em 50%.
+     Gap = 1.6rem. Dot (7px) centralizado: left = -(1.6rem + 3.5px) */
+  .tl-nt::before {
+    position: absolute;
+    left: calc(-1.6rem - 3.5px);
+    top: calc(1rem + .48em);
+    transform: none;
+    width: 7px; height: 7px;
+  }
+
+  /* borda da nota vira direita (conteúdo à direita da linha) */
+  .nota-in {
+    border-left: none;
+    border-right: 3px solid var(--note-bdr);
+    border-radius: 3px 0 0 3px;
+    padding: .6rem .85rem;
+  }
+
+  /* texto da nota menor — é conteúdo secundário */
+  .nt-tx { font-size: .88rem; line-height: 1.7; }
+  .nt-fo { font-size: .66rem; }
 }
 </style>
 </head>
@@ -825,6 +941,20 @@ const ERAS = {
   "Modernidade":   "#38383a",
   "Século XX":     "#4a8fb5",   /* azul cerúleo — virada moderna */
   "Contemporâneo": "#e8c820",   /* amarelo cromo — presente */
+};
+
+/* Cores de fundo por era: tons muito sutis, quase neutros.
+   A ideia é uma temperatura de cor que varia imperceptivelmente
+   do passado (ligeiro bege quente) para o presente (frio/neutro). */
+const ERA_BG = {
+  "Pré-histórica": "#f5f3ee",   /* bege muito quente — terra antiga  */
+  "Antiguidade":   "#f4f2ec",
+  "Medieval":      "#f3f2ee",
+  "Renascença":    "#f2f2f0",
+  "Iluminismo":    "#f1f1f0",
+  "Modernidade":   "#f0f0ef",
+  "Século XX":     "#f0f1f3",   /* levíssimo frio azulado            */
+  "Contemporâneo": "#f1f2f4",   /* frio neutro — presente            */
 };
 
 // Tags disponíveis no seletor do formulário
@@ -1265,6 +1395,61 @@ function buildTimeline() {
   // Cliques nas tags inline
   container.querySelectorAll('.ev-tag').forEach(btn => {
     btn.addEventListener('click', () => filtrarPor(btn.dataset.tag));
+  });
+
+  // Gradiente de fundo progressivo por era
+  aplicarGradienteFundo();
+}
+
+function aplicarGradienteFundo() {
+  // Coleta separadores de era e calcula posição em relação à página inteira
+  const seps = [...container.querySelectorAll('.era-sep')];
+  if (!seps.length) { document.body.style.background = 'var(--bg)'; return; }
+
+  requestAnimationFrame(() => {
+    const pageH = document.documentElement.scrollHeight;
+    if (!pageH) return;
+
+    const stops = [];
+
+    seps.forEach((sep, i) => {
+      const era = sep.querySelector('span')?.textContent?.trim();
+      const bg  = ERA_BG[era];
+      if (!bg) return;
+
+      // offsetTop do sep relativo à página
+      const absTop = sep.getBoundingClientRect().top + window.scrollY;
+      const pct    = +(absTop / pageH * 100).toFixed(2);
+
+      const nextSep = seps[i + 1];
+      const nextAbsTop = nextSep
+        ? nextSep.getBoundingClientRect().top + window.scrollY
+        : pageH;
+      const nextPct = +(nextAbsTop / pageH * 100).toFixed(2);
+
+      stops.push({ pct, endPct: nextPct, color: bg });
+    });
+
+    if (!stops.length) return;
+
+    // Monta gradient com transições suaves (overlap de 3%)
+    const gradStops = [];
+    gradStops.push(`${stops[0].color} 0%`);
+
+    stops.forEach((s, i) => {
+      const prev = stops[i - 1];
+      // Início suave: começa a transição um pouco antes
+      if (prev) gradStops.push(`${s.color} ${(s.pct + 1).toFixed(1)}%`);
+      else       gradStops.push(`${s.color} ${s.pct.toFixed(1)}%`);
+      gradStops.push(`${s.color} ${s.endPct.toFixed(1)}%`);
+    });
+
+    // Último stop
+    gradStops.push(`${stops[stops.length-1].color} 100%`);
+
+    const gradient = `linear-gradient(to bottom, ${gradStops.join(', ')})`;
+    document.body.style.background = gradient;
+    // Remove a variável --bg do body para não sobrescrever
   });
 }
 

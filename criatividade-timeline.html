@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A História da Criatividade</title>
+
+<!--
+╔══════════════════════════════════════════════════════════════════╗
+║          COMO EDITAR ESTA LINHA DO TEMPO                        ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                  ║
+║  Há dois tipos de entrada no array ENTRADAS abaixo.             ║
+║                                                                  ║
+║  EVENTO — marco principal, com card completo:                    ║
+║    tipo:        "evento"                                         ║
+║    era:         string — nome da era (define separador e cor)    ║
+║    ano:         número — use negativo para a.C.                  ║
+║                 ex: -40000, -400, 1790, 2022                     ║
+║    data:        string de exibição — ex: "c. 40.000 a.C."        ║
+║    titulo:      string                                           ║
+║    texto:       string HTML                                      ║
+║    imagem:      string URL ou "" para omitir                     ║
+║    imgCredito:  string legenda da imagem                         ║
+║    referencias: array de { texto, url }                          ║
+║    leitura:     string HTML — abre em "Aprofundar"               ║
+║                                                                  ║
+║  NOTA — pensamento circulante, anotação marginal breve:          ║
+║    tipo:   "nota"                                                ║
+║    ano:    número                                                ║
+║    data:   string de exibição                                    ║
+║    texto:  string HTML curta                                     ║
+║    fonte:  string — autor/obra de referência                     ║
+║                                                                  ║
+║  Para adicionar: copie um bloco { ... } e preencha os campos.   ║
+║  A ordem no array define a ordem de exibição.                    ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝
+-->
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;1,8..60,300;1,8..60,400&family=DM+Mono:wght@300;400&display=swap');
+
+:root {
+  --bg:         #f2ece0;
+  --ink:        #1e160c;
+  --ink2:       #5c4a34;
+  --ink3:       #8c7458;
+  --sepia:      #9a7840;
+  --sepia-pale: #ddd0b8;
+  --wire:       #c4b090;
+  --node:       #f8f4ec;
+  --accent-b:   #1a2e5a;
+  --note-bg:    #fdf8ee;
+  --note-bdr:   #c8b480;
+  --shadow:     rgba(30,22,12,.10);
+  --f-disp: 'Playfair Display', Georgia, serif;
+  --f-body: 'Source Serif 4', Georgia, serif;
+  --f-mono: 'DM Mono', 'Courier New', monospace;
+
+  /* largura da coluna da timeline */
+  --col-left: 1.5rem;
+  --dot-size: 11px;
+  --indent: calc(var(--col-left) + var(--dot-size) + 1rem);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+/* grain */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── HEADER ───────────────────────────────────── */
+header {
+  padding: 4.5rem 1.5rem 3rem;
+  text-align: center;
+  border-bottom: 1px solid var(--wire);
+  background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(154,120,64,.18) 0%, transparent 70%);
+}
+.eyebrow {
+  font-family: var(--f-mono);
+  font-size: .63rem;
+  font-weight: 300;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: var(--sepia);
+  margin-bottom: 1.1rem;
+}
+header h1 {
+  font-family: var(--f-disp);
+  font-size: clamp(2rem, 8vw, 3.8rem);
+  font-weight: 400;
+  line-height: 1.05;
+  margin-bottom: .8rem;
+}
+header h1 em { font-style: italic; color: var(--sepia); }
+.sub {
+  font-size: .93rem;
+  font-style: italic;
+  color: var(--ink2);
+  max-width: 38ch;
+  margin: 0 auto 2rem;
+}
+.hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  font-family: var(--f-mono);
+  font-size: .6rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  animation: bob 2.8s ease-in-out infinite;
+}
+@keyframes bob {
+  0%,100% { transform: translateY(0); opacity: .45; }
+  50%      { transform: translateY(5px); opacity: .9; }
+}
+
+/* ── LEGENDA ──────────────────────────────────── */
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .5rem 1.1rem;
+  padding: .8rem 1.5rem;
+  border-bottom: 1px solid var(--sepia-pale);
+  font-family: var(--f-mono);
+  font-size: .6rem;
+  letter-spacing: .07em;
+  color: var(--ink2);
+}
+.l-item { display: flex; align-items: center; gap: .32rem; }
+.l-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--sepia);
+  border: 1.5px solid var(--bg);
+  box-shadow: 0 0 0 1.5px var(--sepia);
+  flex-shrink: 0;
+}
+.l-line {
+  width: 16px; height: 2px;
+  border-radius: 1px;
+  background: var(--note-bdr);
+  flex-shrink: 0;
+}
+
+/* ── TIMELINE WRAPPER ─────────────────────────── */
+.timeline {
+  position: relative;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 var(--col-left) 8rem;
+}
+
+/* fio vertical */
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--col-left) + var(--dot-size) / 2 - .5px);
+  top: 0; bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    var(--wire) 2%,
+    var(--wire) 98%,
+    transparent 100%);
+}
+
+/* ── ERA SEPARATOR ────────────────────────────── */
+.era-sep {
+  position: relative;
+  padding: 2.5rem 0 .25rem var(--indent);
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+}
+.era-sep::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--dot-size) / 2 - .5px);
+  top: calc(2.5rem + .3em);
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  background: var(--ec, var(--sepia));
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 2px var(--ec, var(--sepia));
+  z-index: 2;
+  transform: translateX(-1px);
+}
+.era-sep span {
+  font-family: var(--f-mono);
+  font-size: .6rem;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--ec, var(--sepia));
+  white-space: nowrap;
+}
+.era-sep::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--ec, var(--sepia));
+  opacity: .22;
+}
+
+/* ── EVENTO ───────────────────────────────────── */
+.tl-ev {
+  position: relative;
+  padding: 1.75rem 0 .5rem var(--indent);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity .45s ease, transform .45s ease;
+}
+.tl-ev.vis { opacity: 1; transform: translateX(0); }
+
+/* dot */
+.tl-ev::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--dot-size) / 2 - .5px);
+  top: calc(1.75rem + .55em);
+  width: var(--dot-size); height: var(--dot-size);
+  border-radius: 50%;
+  background: var(--node);
+  border: 2px solid var(--sepia);
+  z-index: 2;
+  transform: translateX(-50%);
+  transition: background .2s;
+}
+.tl-ev:hover::before { background: var(--sepia); }
+
+.ev-dt {
+  font-family: var(--f-mono);
+  font-size: .63rem;
+  font-weight: 300;
+  letter-spacing: .13em;
+  color: var(--sepia);
+  margin-bottom: .16rem;
+}
+.ev-ti {
+  font-family: var(--f-disp);
+  font-size: 1.12rem;
+  font-weight: 400;
+  line-height: 1.2;
+  margin-bottom: .55rem;
+}
+.card {
+  background: var(--node);
+  border: 1px solid var(--sepia-pale);
+  border-radius: 3px;
+  padding: .85rem .95rem;
+  box-shadow: 0 2px 10px var(--shadow);
+}
+.c-img {
+  width: 100%; border-radius: 2px;
+  max-height: 220px; object-fit: cover;
+  display: block; margin-bottom: .55rem;
+}
+.c-cred {
+  font-size: .61rem; font-family: var(--f-mono);
+  font-weight: 300; color: var(--sepia);
+  margin-top: -.4rem; margin-bottom: .55rem;
+  font-style: italic;
+}
+.ev-tx { font-size: .9rem; color: var(--ink2); line-height: 1.72; }
+.ev-tx em   { font-style: italic; color: var(--ink); }
+.ev-tx strong { font-weight: 600; color: var(--ink); }
+
+details.mais {
+  margin-top: .75rem;
+  border-top: 1px solid var(--sepia-pale);
+  padding-top: .6rem;
+}
+details.mais summary {
+  font-family: var(--f-mono);
+  font-size: .65rem; font-weight: 400;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--sepia);
+  cursor: pointer; list-style: none;
+  display: flex; align-items: center; gap: .32rem;
+  user-select: none;
+}
+details.mais summary::-webkit-details-marker { display: none; }
+details.mais summary::before {
+  content: '▸'; display: inline-block;
+  transition: transform .18s;
+}
+details[open].mais summary::before { transform: rotate(90deg); }
+.mais-body {
+  margin-top: .55rem;
+  font-size: .85rem; color: var(--ink2); line-height: 1.72;
+}
+.mais-body p + p { margin-top: .5rem; }
+
+.refs {
+  margin-top: .7rem;
+  border-top: 1px solid var(--sepia-pale);
+  padding-top: .5rem;
+}
+.refs-t {
+  font-family: var(--f-mono); font-size: .6rem;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--sepia); margin-bottom: .3rem;
+}
+.refs ul { list-style: none; display: flex; flex-direction: column; gap: .25rem; }
+.refs a, .refs .rn {
+  font-size: .78rem; font-family: var(--f-mono);
+  font-weight: 300; line-height: 1.45;
+  display: inline-flex; align-items: baseline; gap: .28em;
+}
+.refs a { color: var(--accent-b); text-decoration: none; }
+.refs a::before { content: '↗'; font-size: .7em; opacity: .5; flex-shrink: 0; }
+.refs a:hover { text-decoration: underline; }
+.refs .rn { color: var(--ink2); }
+
+/* ── NOTA ─────────────────────────────────────── */
+.tl-nt {
+  position: relative;
+  padding: .8rem 0 .4rem var(--indent);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity .4s .04s ease, transform .4s .04s ease;
+}
+.tl-nt.vis { opacity: 1; transform: translateX(0); }
+
+/* dot pequeno */
+.tl-nt::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--dot-size) / 2 - .5px);
+  top: calc(.8rem + .5em);
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--note-bdr);
+  border: 1.5px solid var(--bg);
+  z-index: 2;
+  transform: translateX(-50%);
+}
+.nota-in {
+  background: var(--note-bg);
+  border-left: 2px solid var(--note-bdr);
+  border-radius: 0 2px 2px 0;
+  padding: .42rem .7rem;
+}
+.nt-dt {
+  font-family: var(--f-mono); font-size: .58rem;
+  font-weight: 300; letter-spacing: .13em;
+  color: var(--sepia); margin-bottom: .1rem;
+}
+.nt-tx {
+  font-size: .83rem; font-style: italic;
+  color: var(--ink2); line-height: 1.6;
+}
+.nt-tx em { color: var(--ink); font-style: normal; }
+.nt-fo {
+  margin-top: .28rem;
+  font-family: var(--f-mono); font-size: .6rem;
+  font-weight: 300; color: var(--ink3); letter-spacing: .05em;
+}
+
+/* ── FOOTER ───────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 2rem 1.5rem 3rem;
+  border-top: 1px solid var(--wire);
+  font-family: var(--f-mono);
+  font-size: .63rem; font-weight: 300;
+  letter-spacing: .06em; color: var(--ink3); line-height: 1.9;
+}
+footer a { color: var(--sepia); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+/* ── MOBILE ───────────────────────────────────── */
+@media (max-width: 430px) {
+  :root {
+    --col-left: 1.1rem;
+    --dot-size: 10px;
+  }
+  header h1 { font-size: 2rem; }
+  .timeline { padding-bottom: 5rem; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">Uma arqueologia do conceito</p>
+  <h1>A História da<br><em>Criatividade</em></h1>
+  <p class="sub">Como a humanidade pensou, nomeou e transformou o ato de criar ao longo dos séculos.</p>
+  <div class="hint">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+      <path d="M6.5 2v9M2 8l4.5 4 4.5-4" stroke="#8c7458" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    role para avançar no tempo
+  </div>
+</header>
+
+<div class="legenda">
+  <div class="l-item"><span class="l-dot"></span>Marco principal</div>
+  <div class="l-item"><span class="l-line"></span>Pensamento circulante</div>
+</div>
+
+<main class="timeline" id="timeline"></main>
+
+<footer>
+  <p>Linha do tempo em construção contínua.</p>
+  <p>Última atualização: <span id="ult"></span></p>
+</footer>
+
+<script>
+// ================================================================
+// ▼▼▼  EDITE AQUI — todos os conteúdos estão neste array  ▼▼▼
+// ================================================================
+
+const ULTIMA_ATUALIZACAO = "2026-04";
+
+// Cores por era (afeta separador e dot de era)
+const ERAS = {
+  "Pré-histórica": "#7a6040",
+  "Antiguidade":   "#8b3a1e",
+  "Medieval":      "#2a5c45",
+  "Renascença":    "#1e3a6e",
+  "Iluminismo":    "#5c2a6e",
+  "Modernidade":   "#6e2a2a",
+  "Século XX":     "#1e3a6e",
+  "Contemporâneo": "#1e5038",
+};
+
+// tipo: "evento" ou "nota"
+// Ordem no array = ordem de exibição (organize do mais antigo ao mais recente)
+const ENTRADAS = [
+
+  // ── PRÉ-HISTÓRIA ────────────────────────────────────────────
+  {
+    tipo: "evento", era: "Pré-histórica",
+    ano: -40000, data: "c. 40.000 a.C.",
+    titulo: "As primeiras marcas intencionais",
+    texto: `Pinturas rupestres em cavernas como Lascaux (França) e Altamira (Espanha) revelam escolhas estéticas deliberadas — composição, escala, sobreposição. A <em>intenção de representar</em> parece preceder qualquer conceito de "criatividade": o ato vem antes da palavra.`,
+    imagem: "", imgCredito: "",
+    referencias: [
+      { texto: "Lascaux — sítio oficial", url: "https://www.lascaux.fr/en" },
+      { texto: "Leroi-Gourhan — Préhistoire de l'art occidental (1965)", url: "" },
+    ],
+    leitura: `<p>A ideia de que arte rupestre seja "proto-criatividade" é contestada: muitos pesquisadores argumentam que esses registros tinham funções rituais ou de comunicação coletiva — não "expressão individual" no sentido moderno.</p>
+    <p>O que esses registros revelam é a capacidade humana de <strong>simbolizar</strong>: transformar experiência em signo. Essa capacidade é hoje considerada um dos marcadores cognitivos da espécie.</p>`,
+  },
+  {
+    tipo: "nota",
+    ano: -35000, data: "c. 35.000 a.C.",
+    texto: `O mundo é animado — pedras, rios, animais têm espírito. Fazer uma imagem de um bisão é um ato de poder sobre ele. <em>Criar e invocar são a mesma coisa.</em>`,
+    fonte: "Animismo pré-histórico",
+  },
+
+  // ── ANTIGUIDADE ─────────────────────────────────────────────
+  {
+    tipo: "evento", era: "Antiguidade",
+    ano: -3000, data: "c. 3.000 a.C.",
+    titulo: "Criação como ato divino — os mitos cosmogônicos",
+    texto: `No Egito Antigo, Ptah cria o mundo pelo verbo; na Mesopotâmia, os deuses moldam o ser humano do barro. Em quase todas as cosmogonias antigas, <em>criar</em> é prerrogativa exclusiva do divino. O artesão humano não cria — ele imita, reproduz, obedece a padrões revelados.`,
+    imagem: "", imgCredito: "",
+    referencias: [
+      { texto: "Eliade, Mircea — Mito e Realidade (1963)", url: "" },
+      { texto: "Heidel — The Babylonian Genesis (1942)", url: "" },
+    ],
+    leitura: `<p>A distinção entre <em>creatio ex nihilo</em> (criação do nada, reservada a Deus) e <em>poiesis</em> (fabricação a partir de matéria preexistente) percorrerá séculos de filosofia e teologia ocidental.</p>`,
+  },
+  {
+    tipo: "nota",
+    ano: -2500, data: "c. 2.500 a.C.",
+    texto: `O arquiteto egípcio <em>Imhotep</em> — construtor da pirâmide de Djoser — é um dos primeiros indivíduos identificados pelo nome como criador excepcional. Séculos depois será deificado. O artífice começa a ganhar rosto.`,
+    fonte: "Tradição egípcia antiga",
+  },
+  {
+    tipo: "evento", era: "Antiguidade",
+    ano: -400, data: "c. 400 a.C.",
+    titulo: "Platão: a Musa cria — o artista apenas recebe",
+    texto: `Em <em>A República</em> e no <em>Íon</em>, Platão posiciona o artista três graus abaixo da Verdade. O poeta não inventa — é tomado por loucura divina (<em>mania</em>), um canal. <strong>A Musa cria; o artista recebe.</strong>`,
+    imagem: "", imgCredito: "",
+    referencias: [
+      { texto: "Platão — A República, Livro X", url: "" },
+      { texto: "Platão — Íon", url: "" },
+    ],
+    leitura: `<p>A teoria da inspiração divina de Platão é ao mesmo tempo uma desqualificação e uma sacralização do artista. O artista não pensa — ele recebe. Por isso não merece lugar na cidade ideal, mas sua obra tem origem sobrenatural.</p>
+    <p>Esse modelo da Musa como fonte externa ressurge de modo laicizado em Elizabeth Gilbert (<em>Big Magic</em>, 2015) e na ideia de <em>flow</em> de Csikszentmihalyi.</p>`,
+  },
+  {
+    tipo: "evento", era: "Antiguidade",
+    ano: -335, data: "c. 335 a.C.",
+    titulo: "Aristóteles: poiesis e o conhecimento do fazer",
+    texto: `Aristóteles separa <em>techne</em> (habilidade técnica racional) de <em>episteme</em> (conhecimento teórico). A <em>poiesis</em> é uma forma de techne orientada à produção. O artista imita a natureza <em>com conhecimento de causas</em>. Pela primeira vez, <strong>o fazer criativo é tratado como conhecimento legítimo</strong>.`,
+    imagem: "", imgCredito: "",
+    referencias: [
+      { texto: "Aristóteles — Poética", url: "" },
+      { texto: "Aristóteles — Ética a Nicômaco, Livro VI", url: "" },
+    ],
+    leitura: `<p>A <em>mimesis</em> aristotélica não é cópia passiva: é revelação de estruturas universais através de casos particulares. O poeta que inventa uma tragédia plausível diz algo mais verdadeiro que o historiador que relata fatos.</p>`,
+  },
+
+  // ── MEDIEVAL ────────────────────────────────────────────────
+  {
+    tipo: "nota",
+    ano: 400, data: "c. séc. V",
+    texto: `Agostinho de Hipona: toda beleza deriva da proporção, da unidade, da ordem — atributos de Deus. O artesão que cria bem está participando da razão divina, <em>inconscientemente ou não</em>.`,
+    fonte: "Agostinho — De Musica (c. 390)",
+  },
+  {
+    tipo: "evento", era: "Medieval",
+    ano: 900, data: "c. 400 — 1400",
+    titulo: "O artesão anônimo e a Glória de Deus",
+    texto: `Na Idade Média europeia, o artista é artesão integrado a uma ordem cósmica. Catedrais góticas são obras coletivas e anônimas — a autoria individual não é valorizada. <em>Ars</em> é técnica a serviço do sagrado. O conceito de <strong>originalidade pessoal</strong> é ainda ausente ou suspeito.`,
+    imagem: "", imgCredito: "",
+    referencias: [
+      { texto: "Eco, Umberto — Arte e Beleza na Estética Medieval (1987)", url: "" },
+    ],
+    leitura: `<p>Paradoxalmente, é neste período que surgem tratados técnicos detalhados (como o <em>Schedula Diversarum Artium</em> de Teófilo, séc. XII) que registram com precisão procedimentos de pintura, vitral e metalurgia — uma valorização do saber-fazer como herança transmissível.</p>`,
+  },
+  {
+    tipo: "nota",
+    ano: 1267, data: "c. 1267",
+    texto: `Roger Bacon defende que o conhecimento da natureza, obtido por observação e experimentação, é caminho para a sabedoria divina. Uma semente do empirismo: criar é também conhecer a partir da experiência direta.`,
+    fonte: "Bacon, Roger — Opus Majus (c. 1267)",
+  },
+
+  // ── RENASCENÇA ──────────────────────────────────────────────
+  {
+    tipo: "evento", era: "Renascença",
+    ano: 1450, data: "c. 1400 — 1550",
+    titulo: "O gênio emerge: o artista como indivíduo criador",
+    texto: `O Renascimento italiano inaugura o conceito de <em>ingenium</em> — o talento singular do artista. Vasari escreve <em>Vidas dos Artistas</em> (1550) e inventa a biografia do gênio. Leonardo, Michelangelo e Rafael tornam-se <strong>personalidades</strong>, não apenas artífices. A criatividade começa a ser localizada no sujeito humano excepcional.`,
+    imagem: "", imgCredito: "",
+    referencias: [
+      { texto: "Vasari, Giorgio — Vidas dos Artistas (1550)", url: "" },
+      { texto: "Kris & Kurz — A Lenda do Artista (1934)", url: "" },
+    ],
+    leitura: `<p>Kris e Kurz mostram que a narrativa do "gênio solitário" segue padrões hagiográficos medievais: infância prodígio, descoberta por um mestre, obra incompreendida. O mito do gênio criativo é, em parte, uma secularização do mito do santo.</p>
+    <p>É também neste período que surge o <em>disegno</em> — o projeto mental que precede o objeto físico: uma proto-teoria do processo criativo.</p>`,
+  },
+  {
+    tipo: "nota",
+    ano: 1513, data: "1513",
+    texto: `Maquiavel: a <em>virtù</em> — a capacidade de agir com engenho e força diante da fortuna imprevisível — separa o estadista eficaz do medíocre. O criador, como o príncipe, precisa impor forma ao caos.`,
+    fonte: "Maquiavel — O Príncipe (1513)",
+  },
+
+  // ── ILUMINISMO ──────────────────────────────────────────────
+  {
+    tipo: "nota",
+    ano: 1620, data: "1620",
+    texto: `Francis Bacon propõe o método indutivo: a natureza revela seus segredos a quem a observa sistematicamente. Criar começa a ser pensado como <em>processo</em> — não inspiração, mas método.`,
+    fonte: "Bacon, Francis — Novum Organum (1620)",
+  },
+  {
+    tipo: "nota",
+    ano: 1651, data: "1651",
+    texto: `Hobbes e o <em>Leviatã</em>: a teoria do direito natural (Grotius, Pufendorf, Locke) instala a <em>razão individual</em> como fundamento da ordem social — e, indiretamente, da autoria e da propriedade intelectual sobre criações.`,
+    fonte: "Hobbes — Leviatã (1651) / Locke — Segundo Tratado (1689)",
+  },
+  {
+    tipo: "nota",
+    ano: 1690, data: "1690",
+    texto: `Locke: a mente ao nascer é uma <em>tabula rasa</em> — todas as ideias vêm da experiência. Criar não é receber iluminação divina, mas <em>reprocessar experiências vividas</em>. A criatividade começa a ser naturalizada.`,
+    fonte: "Locke — Ensaio sobre o Entendimento Humano (1690)",
+  },
+  {
+    tipo: "evento", era: "Iluminismo",
+    ano: 1790, data: "1790",
+    titulo: "Kant: o gênio como natureza que dita a regra",
+    texto: `Na <em>Crítica do Juízo</em>, Kant define gênio como a "<strong>disposição inata do espírito pela qual a natureza dita a regra à arte</strong>". O gênio não segue regras — as cria. Essa formulação funda o Romantismo e estabelece a criatividade como ruptura com o convencional.`,
+    imagem: "", imgCredito: "",
+    referencias: [
+      { texto: "Kant — Crítica do Juízo §46–50 (1790)", url: "" },
+      { texto: "Abrams, M.H. — The Mirror and the Lamp (1953)", url: "" },
+    ],
+    leitura: `<p>Kant distingue talento técnico (que pode ser aprendido) de gênio (que não pode ser ensinado). O gênio produz obras que servem de modelo para outros, mas que ele mesmo não consegue explicar racionalmente como produziu.</p>`,
+  },
+  {
+    tipo: "nota",
+    ano: 1800, data: "c. 1800",
+    texto: `O Romantismo celebra a Natureza como força criadora suprema — e o artista como aquele que <em>sente o que o comum não sente</em>. Sensibilidade extrema, sofrimento, solidão: marcas do verdadeiro criador. Patologia e gênio começam a se fundir.`,
+    fonte: "Schiller, Novalis, Keats — tradição romântica europeia",
+  },
+
+  // ── MODERNIDADE ─────────────────────────────────────────────
+  {
+    tipo: "nota",
+    ano: 1859, data: "1859",
+    texto: `Darwin: as espécies se transformam por variação aleatória e seleção. A ideia de que novidade emerge de <em>variação + seleção</em> será transposta para teorias da criatividade cultural no séc. XX (Campbell, Simonton).`,
+    fonte: "Darwin — A Origem das Espécies (1859)",
+  },
+  {
+    tipo: "nota",
+    ano: 1883, data: "1883",
+    texto: `Nietzsche e a <em>vontade de poder</em>: criar é o ato supremo humano, afirmação da vida contra o niilismo. O artista que cria novos valores é o protótipo do <em>Übermensch</em>. <em>Criar é perigoso — e necessário.</em>`,
+    fonte: "Nietzsche — Assim Falou Zaratustra (1883)",
+  },
+  {
+    tipo: "evento", era: "Modernidade",
+    ano: 1910, data: "1900 — 1920",
+    titulo: "Freud e o inconsciente criativo",
+    texto: `Freud propõe que a criação artística é <em>sublimação</em> — energia libidinal redirecionada para produção cultural. O criador não controla a origem de sua obra: ela emerge do <strong>inconsciente</strong>. A obra "sabe mais" do que o artista.`,
+    imagem: "", imgCredito: "",
+    referencias: [
+      { texto: "Freud — O Escritor e a Fantasia (1908)", url: "" },
+      { texto: "Freud — Uma Recordação de Infância de Leonardo da Vinci (1910)", url: "" },
+    ],
+    leitura: `<p>A contribuição duradoura de Freud foi enfatizar que o processo criativo não é totalmente consciente ou racional — há camadas que escapam ao controle do sujeito. Essa ideia fertilizará o Surrealismo e décadas de psicologia criativa.</p>`,
+  },
+  {
+    tipo: "nota",
+    ano: 1924, data: "1924",
+    texto: `Manifesto Surrealista de Breton: a escrita automática, os sonhos e o acaso são caminhos para a verdade criativa reprimida pela razão burguesa. O inconsciente freudiano vira <em>método artístico</em>.`,
+    fonte: "Breton, André — Manifesto do Surrealismo (1924)",
+  },
+  {
+    tipo: "evento", era: "Modernidade",
+    ano: 1926, data: "1926",
+    titulo: "Wallas: as quatro etapas do processo criativo",
+    texto: `Graham Wallas sistematiza o processo criativo em quatro fases: <strong>preparação, incubação, iluminação e verificação</strong>. É a primeira tentativa científica de modelar o processo criativo como etapas identificáveis.`,
+    imagem: "", imgCredito: "",
+    referencias: [
+      { texto: "Wallas, Graham — The Art of Thought (1926)", url: "" },
+    ],
+    leitura: `<p>O conceito de <em>incubação</em> — aquele período em que "deixamos o problema de lado" e ele continua sendo processado inconscientemente — é a contribuição mais duradoura de Wallas. Hoje encontra suporte em pesquisas de neurociência sobre a <em>default mode network</em>.</p>`,
+  },
+  {
+    tipo: "nota",
+    ano: 1934, data: "1934",
+    texto: `Dewey em <em>Arte como Experiência</em>: a experiência estética não é separada da vida cotidiana. Criar e perceber são formas de experiência completa, integradas ao viver. Uma crítica ao isolamento do gênio.`,
+    fonte: "Dewey, John — Art as Experience (1934)",
+  },
+
+  // ── SÉCULO XX ───────────────────────────────────────────────
+  {
+    tipo: "evento", era: "Século XX",
+    ano: 1950, data: "1950",
+    titulo: "Guilford e o pensamento divergente",
+    texto: `Na conferência presidencial da APA, J.P. Guilford critica a psicologia por ignorar a criatividade e propõe o conceito de <strong>pensamento divergente</strong> — a capacidade de gerar múltiplas respostas a um problema. Inaugura-se a pesquisa empírica sistemática.`,
+    imagem: "", imgCredito: "",
+    referencias: [
+      { texto: "Guilford, J.P. — Creativity (Presidential Address, APA, 1950)", url: "" },
+    ],
+    leitura: `<p>A redução da criatividade ao pensamento divergente foi logo criticada: criar bem exige também convergência, seleção, refinamento — o que Wallas chamava de verificação. A dicotomia divergente/convergente ainda estrutura muitos programas de educação criativa.</p>`,
+  },
+  {
+    tipo: "nota",
+    ano: 1960, data: "c. 1960",
+    texto: `Betty Edwards começa a desenvolver o que se tornará <em>Drawing on the Right Side of the Brain</em> (1979): desenhar exige desligar o modo verbal-simbólico e ativar o modo perceptivo-espacial. Criar demanda uma <em>mudança de modo de ver</em>.`,
+    fonte: "Edwards, Betty — Drawing on the Right Side of the Brain (1979)",
+  },
+  {
+    tipo: "nota",
+    ano: 1967, data: "1967",
+    texto: `Barthes declara a "morte do autor": o sentido de um texto não reside na intenção de quem o escreveu, mas na leitura. O criador como origem e garante do significado é uma ilusão. <em>O leitor é co-criador.</em>`,
+    fonte: "Barthes, Roland — A Morte do Autor (1967)",
+  },
+  {
+    tipo: "nota",
+    ano: 1969, data: "1969",
+    texto: `Foucault, em "O que é um autor?": a função-autor é uma construção histórica que serve para controlar e unificar discursos. O "autor" como instância criadora soberana é relativamente recente e culturalmente específico.`,
+    fonte: "Foucault, Michel — O que é um Autor? (1969)",
+  },
+  {
+    tipo: "nota",
+    ano: 1969, data: "1969",
+    texto: `Perec e o Oulipo: a restrição formal como <em>motor</em> criativo. Escrever um romance sem a letra "e" força o escritor a soluções inesperadas. Criar é negociar com o impossível.`,
+    fonte: "Perec, Georges — La Disparition (1969) / Literatura Potencial (Oulipo)",
+  },
+  {
+    tipo: "evento", era: "Século XX",
+    ano: 1975, data: "1975 — 1990",
+    titulo: "Csikszentmihalyi e o estado de flow",
+    texto: `Mihaly Csikszentmihalyi estuda criadores de alto desempenho e nomeia o estado de <strong>flow</strong>: absorção total na tarefa, dissolução do senso de tempo e de self. Em <em>Creativity</em> (1996), propõe que criatividade é um <em>sistema</em> — não apenas um traço individual.`,
+    imagem: "", imgCredito: "",
+    referencias: [
+      { texto: "Csikszentmihalyi — Flow (1990)", url: "" },
+      { texto: "Csikszentmihalyi — Creativity (1996)", url: "" },
+    ],
+    leitura: `<p>Flow exige equilíbrio entre desafio e habilidade: muito fácil gera tédio; muito difícil gera ansiedade. O estado criativo ótimo vive nessa borda.</p>
+    <p>Csikszentmihalyi também argumenta que criatividade é um <em>sistema</em> que envolve o domínio (conhecimento acumulado), o campo (especialistas que julgam) e o indivíduo. Uma ideia só é criativa se for reconhecida como tal pelo campo.</p>`,
+  },
+  {
+    tipo: "evento", era: "Século XX",
+    ano: 1978, data: "1978",
+    titulo: "Brian Eno e as Oblique Strategies",
+    texto: `Com Peter Schmidt, Brian Eno cria um baralho de 100+ cartões com instruções oblíquas para momentos de bloqueio: "Use uma cor mais velha", "Trabalhe com o erro". Uma ferramenta que <strong>externaliza o acaso como dispositivo metodológico</strong>.`,
+    imagem: "", imgCredito: "",
+    referencias: [
+      { texto: "Oblique Strategies — enoshop.co.uk", url: "https://www.enoshop.co.uk/product/oblique-strategies.html" },
+    ],
+    leitura: `<p>As Oblique Strategies são uma aplicação prática do automatismo surrealista e da tradição Fluxus de usar restrições e acaso como gatilhos criativos. Antecipam práticas de design thinking e facilitação criativa dos anos 2000.</p>`,
+  },
+  {
+    tipo: "evento", era: "Século XX",
+    ano: 1992, data: "1992",
+    titulo: "Teresa Amabile: motivação intrínseca e criatividade",
+    texto: `Amabile demonstra experimentalmente que <em>recompensas externas e vigilância diminuem a criatividade</em>. Seu modelo coloca a motivação interna como insubstituível — e mostra que ambientes controladores sabotam a criação mesmo quando oferecem prêmios.`,
+    imagem: "", imgCredito: "",
+    referencias: [
+      { texto: "Amabile — Creativity in Context (1996)", url: "" },
+    ],
+    leitura: `<p>O efeito de "overjustification": quando você começa a pagar alguém por algo que fazia por prazer, a motivação intrínseca cai. Implica que ambientes com monitoramento constante sabotam a criatividade mesmo quando oferecem recompensas.</p>`,
+  },
+
+  // ── CONTEMPORÂNEO ───────────────────────────────────────────
+  {
+    tipo: "nota",
+    ano: 2001, data: "2001",
+    texto: `Creative Commons é fundada: uma infraestrutura legal para compartilhar obras de modo que outros possam criar a partir delas. A criatividade como prática coletiva e cumulativa recebe <em>suporte jurídico explícito</em>.`,
+    fonte: "Creative Commons — fundada por Lawrence Lessig (2001)",
+  },
+  {
+    tipo: "nota",
+    ano: 2009, data: "2009",
+    texto: `"Criatividade" entra definitivamente no vocabulário corporativo: <em>design thinking</em>, <em>inovação aberta</em>, <em>cultura criativa</em>. O conceito que nasceu reservado ao gênio e ao sagrado é agora competência profissional gerenciável.`,
+    fonte: "Brown, Tim — Change by Design (2009)",
+  },
+  {
+    tipo: "evento", era: "Contemporâneo",
+    ano: 2013, data: "2011 — 2016",
+    titulo: "As neurociências da criatividade",
+    texto: `Rex Jung e Roger Beaty mapeiam redes cerebrais associadas à criatividade. A <em>default mode network</em> e sua interação com redes de controle executivo revelam que <strong>criar envolve tanto soltar o controle quanto saber quando retomá-lo</strong> — e que pessoas altamente criativas sustentam esses dois estados simultaneamente.`,
+    imagem: "", imgCredito: "",
+    referencias: [
+      { texto: "Jung et al. — The Structure of Creative Cognition (2013)", url: "" },
+      { texto: "Beaty et al. — Creative Cognition and Brain Network Dynamics (2016)", url: "" },
+    ],
+    leitura: `<p>Pessoas altamente criativas mostram maior conectividade simultânea entre redes que em outros indivíduos ficam em oposição. Criar exige a convivência de estados mentais aparentemente contraditórios.</p>`,
+  },
+  {
+    tipo: "evento", era: "Contemporâneo",
+    ano: 2022, data: "2022 — hoje",
+    titulo: "Inteligência Artificial e a crise do conceito",
+    texto: `Com sistemas de IA gerando imagens, textos, músicas e código, o conceito de criatividade é novamente interrogado. O que é original? O que é humano no ato de criar? A distinção ontológica entre <strong>criar e recombinar</strong> está em aberto — e expõe o quanto essa distinção sempre foi frágil.`,
+    imagem: "", imgCredito: "",
+    referencias: [
+      { texto: "Boden, Margaret — Creativity and AI: A Contradiction? (2020)", url: "" },
+      { texto: "Elgammal — AI Is Blurring the Definition of Artist (2019)", url: "https://www.scientificamerican.com/article/ai-is-blurring-the-definition-of-artist/" },
+    ],
+    leitura: `<p>Margaret Boden propõe três tipos de criatividade: combinatória, exploratória e transformacional. IAs atuais seriam capazes das duas primeiras — a terceira permanece em disputa.</p>
+    <p>Para Lev Manovich, a questão não é se a IA "realmente" cria, mas o que isso revela sobre o quanto da criatividade humana sempre foi, em algum grau, processamento cultural de padrões aprendidos.</p>`,
+  },
+
+];
+
+// ================================================================
+// ▲▲▲  FIM DOS DADOS  ▲▲▲
+// ================================================================
+
+document.getElementById('ult').textContent = ULTIMA_ATUALIZACAO;
+
+const container = document.getElementById('timeline');
+let eraAtual = null;
+
+ENTRADAS.forEach(e => {
+
+  // Separador de era (apenas para eventos)
+  if (e.tipo === 'evento' && e.era && e.era !== eraAtual) {
+    eraAtual = e.era;
+    const cor = ERAS[e.era] || '#9a7840';
+    const sep = document.createElement('div');
+    sep.className = 'era-sep';
+    sep.style.setProperty('--ec', cor);
+    sep.innerHTML = `<span>${e.era}</span>`;
+    container.appendChild(sep);
+  }
+
+  const el = document.createElement('div');
+
+  if (e.tipo === 'evento') {
+    el.className = 'tl-ev';
+
+    const img = e.imagem
+      ? `<img class="c-img" src="${e.imagem}" alt="${e.titulo}" loading="lazy">
+         ${e.imgCredito ? `<p class="c-cred">${e.imgCredito}</p>` : ''}`
+      : '';
+
+    const refs = (e.referencias && e.referencias.length)
+      ? `<div class="refs">
+           <p class="refs-t">Referências</p>
+           <ul>${e.referencias.map(r =>
+             r.url
+               ? `<li><a href="${r.url}" target="_blank" rel="noopener">${r.texto}</a></li>`
+               : `<li><span class="rn">${r.texto}</span></li>`
+           ).join('')}</ul>
+         </div>`
+      : '';
+
+    const mais = e.leitura
+      ? `<details class="mais">
+           <summary>Aprofundar</summary>
+           <div class="mais-body">${e.leitura}</div>
+         </details>`
+      : '';
+
+    el.innerHTML = `
+      <p class="ev-dt">${e.data}</p>
+      <h2 class="ev-ti">${e.titulo}</h2>
+      <div class="card">
+        ${img}
+        <div class="ev-tx">${e.texto}</div>
+        ${mais}
+        ${refs}
+      </div>`;
+
+  } else {
+    el.className = 'tl-nt';
+    el.innerHTML = `
+      <div class="nota-in">
+        <p class="nt-dt">${e.data}</p>
+        <p class="nt-tx">${e.texto}</p>
+        ${e.fonte ? `<p class="nt-fo">— ${e.fonte}</p>` : ''}
+      </div>`;
+  }
+
+  container.appendChild(el);
+});
+
+// Scroll reveal
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(en => {
+    if (en.isIntersecting) {
+      en.target.classList.add('vis');
+      obs.unobserve(en.target);
+    }
+  });
+}, { threshold: 0.06, rootMargin: '0px 0px -30px 0px' });
+
+document.querySelectorAll('.tl-ev, .tl-nt').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
